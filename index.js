@@ -11,7 +11,7 @@ app.use(express.json());
 
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = "mongodb+srv://TeamConnect:WMcqPqSgUjSl2EEP@cluster0.2vutuar.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -33,11 +33,32 @@ async function run() {
     app.get('/allPost', async(req,res)=>{
       const find = AllPost.find();
             const result = await find.toArray();
+            result.sort((a, b) => new Date(b.Post_date) - new Date(a.Post_date));
             res.send(result)
     })
+    
+
+    
+    app.get('/allPost/:id', async (req, res) => {
+      const id = req.params.id;
+      console.log(id)
+      const quary = { _id : new ObjectId(id) }
+      const result = await AllPost.findOne(quary)
+      res.send(result)
+  });
+  
 
 
 
+
+
+
+
+
+
+
+
+  
     app.post("/allPost", async (req, res) => {
      
         const post = req.body;
@@ -45,6 +66,34 @@ async function run() {
         res.send(result);
       
     });
+
+
+      app.put("/allPost/:id",async (req, res) => {
+    const id = req.params.id;
+    const like= req.body;
+    console.log(id,like)
+      
+    const filter = { _id: new ObjectId(id) };
+    console.log(filter)
+    const options = {upset: true};
+    const updateSpot = {
+      $set: {
+        Like: like.Like,
+      }
+    }  
+    const result = await AllPost.updateOne(filter,updateSpot,options);
+    res.send(result)
+})
+
+  
+
+
+
+
+
+
+
+
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } catch (error) {
